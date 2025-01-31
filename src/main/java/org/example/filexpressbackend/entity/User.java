@@ -48,4 +48,7 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private PrivateKey privateKey; // One-to-one relationship with PrivateKey
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FilePaths> filePaths; // One-to-many relationship with FilePaths
 }
