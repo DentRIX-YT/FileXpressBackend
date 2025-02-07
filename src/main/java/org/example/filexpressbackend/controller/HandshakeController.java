@@ -8,10 +8,7 @@ import org.example.filexpressbackend.service.HandshakeService;
 import org.example.filexpressbackend.service.PrivateKeyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -38,8 +35,7 @@ public class HandshakeController {
 
         String senderUsername = handshakeService.validateHandshake(request.getReceiverUsername(), request.getProvidedHandshakeCode());
         if (senderUsername != null) {
-            // Removing the handshake code from the database
-            handshakeService.removeHandshake(senderUsername);
+            handshakeService.markHandshakeAsAccepted(senderUsername);
             return ResponseEntity.ok(Map.of(
                     "status", "success",
                     "encryptedPrivateKey", privateKeyService.getPrivateKey(request.getReceiverUsername())
@@ -47,5 +43,15 @@ public class HandshakeController {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("status", "failed"));
+    }
+
+    @GetMapping("/status/{senderUsername}")
+    public ResponseEntity<Map<String, String>> checkHandshakeStatus(@PathVariable String senderUsername) {
+        boolean isCompleted = handshakeService.isHandshakeComplete(senderUsername);
+        if (isCompleted) {
+            handshakeService.removeHandshake(senderUsername);
+            return ResponseEntity.ok(Map.of("status", "completed"));
+        }
+        return ResponseEntity.ok(Map.of("status", "pending"));
     }
 }

@@ -22,6 +22,8 @@ public class Handshake {
     @Column(nullable = false)
     private LocalDateTime createdAt; // Store the timestamp
 
+    private boolean isAccepted = false;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now(); // Set creation time when saved

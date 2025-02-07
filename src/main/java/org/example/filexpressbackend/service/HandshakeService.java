@@ -58,6 +58,7 @@ public class HandshakeService {
             return null;
         }
 
+
         return handshakeRepository.findByHandshakeCode(handshakeCode)
                 .map(Handshake::getSenderUsername)
                 .orElse(null);
@@ -109,5 +110,19 @@ public class HandshakeService {
         } catch (Exception e) {
             return false; // Decryption failed → Incorrect passphrase
         }
+    }
+
+    public void markHandshakeAsAccepted(String senderUsername) {
+        Handshake handshake = handshakeRepository.findBySenderUsername(senderUsername).orElse(null);
+        if (handshake != null) {
+            handshake.setAccepted(true);
+            handshakeRepository.save(handshake); // ✅ Save the updated entity
+        }
+    }
+
+    public boolean isHandshakeComplete(String senderUsername) {
+        return handshakeRepository.findBySenderUsername(senderUsername)
+                .map(Handshake::isAccepted)
+                .orElse(false);
     }
 }
