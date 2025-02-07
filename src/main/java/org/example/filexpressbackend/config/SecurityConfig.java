@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/login/**", "/refresh_token").permitAll()
                         .requestMatchers("/api/private-key/**").permitAll()
                         .requestMatchers("/api/public-key/**").permitAll()
+                        .requestMatchers("/handshake/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
