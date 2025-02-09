@@ -17,6 +17,7 @@ public class Handshake {
     private Long id;
 
     private String senderUsername;
+    private String receiverUsername;
     private String handshakeCode;
 
     @Column(nullable = false)

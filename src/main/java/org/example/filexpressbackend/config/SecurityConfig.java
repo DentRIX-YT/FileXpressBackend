@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/private-key/**").permitAll()
                         .requestMatchers("/api/public-key/**").permitAll()
                         .requestMatchers("/handshake/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/handshake/remove/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users/**").permitAll()

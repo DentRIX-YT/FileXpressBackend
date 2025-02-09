@@ -25,6 +25,7 @@ public class HandshakeService {
     private final HandshakeRepository handshakeRepository;
     private final UserRepository userRepository;
     private final PrivateKeyService privateKeyService;
+    private final PublicKeyService publicKeyService;
 
     //add handshake to the database temporarily
     public Handshake addHandshake(String senderUsername, String handshakeCode) {
@@ -116,7 +117,7 @@ public class HandshakeService {
         Handshake handshake = handshakeRepository.findBySenderUsername(senderUsername).orElse(null);
         if (handshake != null) {
             handshake.setAccepted(true);
-            handshakeRepository.save(handshake); // ✅ Save the updated entity
+            handshakeRepository.save(handshake); //Save the updated entity
         }
     }
 
@@ -124,5 +125,32 @@ public class HandshakeService {
         return handshakeRepository.findBySenderUsername(senderUsername)
                 .map(Handshake::isAccepted)
                 .orElse(false);
+    }
+
+    public void setHandshakeReceiver(String receiverUsername, String handshakeCode){
+        Handshake handshake = handshakeRepository.findByHandshakeCode(handshakeCode).orElse(null);
+        if(handshake != null){
+            handshake.setReceiverUsername(receiverUsername);
+            handshakeRepository.save(handshake);
+        }
+    }
+
+    public String getReceiverPublicKey(String senderUsername){
+        String receiverUsername = handshakeRepository.findBySenderUsername(senderUsername)
+                .map(Handshake::getReceiverUsername)
+                .orElse(null);
+
+        if(receiverUsername == null){
+            return null;
+        }
+        else{
+            return publicKeyService.getPublicKey(receiverUsername).orElse(null);
+        }
+    }
+
+    public String getReceiverFromSender(String senderUsername){
+        return handshakeRepository.findBySenderUsername(senderUsername)
+                .map(Handshake::getReceiverUsername)
+                .orElse(null);
     }
 }

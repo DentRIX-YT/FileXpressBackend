@@ -36,6 +36,7 @@ public class HandshakeController {
         String senderUsername = handshakeService.validateHandshake(request.getReceiverUsername(), request.getProvidedHandshakeCode());
         if (senderUsername != null) {
             handshakeService.markHandshakeAsAccepted(senderUsername);
+            handshakeService.setHandshakeReceiver(request.getReceiverUsername(), request.getProvidedHandshakeCode());
             return ResponseEntity.ok(Map.of(
                     "status", "success",
                     "encryptedPrivateKey", privateKeyService.getPrivateKey(request.getReceiverUsername())
@@ -49,9 +50,15 @@ public class HandshakeController {
     public ResponseEntity<Map<String, String>> checkHandshakeStatus(@PathVariable String senderUsername) {
         boolean isCompleted = handshakeService.isHandshakeComplete(senderUsername);
         if (isCompleted) {
-            handshakeService.removeHandshake(senderUsername);
-            return ResponseEntity.ok(Map.of("status", "completed"));
+//            handshakeService.removeHandshake(senderUsername); //not removing the handshake for now
+            return ResponseEntity.ok(Map.of("status", "completed", "receiverUsername" , handshakeService.getReceiverFromSender(senderUsername), "receiverPublicKey", handshakeService.getReceiverPublicKey(senderUsername)));
         }
         return ResponseEntity.ok(Map.of("status", "pending"));
+    }
+
+    @DeleteMapping("/remove/{senderUsername}")
+    public ResponseEntity<Map<String, String>> removeHandshake(@PathVariable String senderUsername) {
+        handshakeService.removeHandshake(senderUsername);
+        return ResponseEntity.ok(Map.of("status", "removed"));
     }
 }
