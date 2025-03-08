@@ -39,7 +39,8 @@ public class HandshakeController {
             handshakeService.setHandshakeReceiver(request.getReceiverUsername(), request.getProvidedHandshakeCode());
             return ResponseEntity.ok(Map.of(
                     "status", "success",
-                    "encryptedPrivateKey", privateKeyService.getPrivateKey(request.getReceiverUsername())
+                    "encryptedPrivateKey", privateKeyService.getPrivateKey(request.getReceiverUsername()),
+                    "senderUsername", senderUsername
             ));
         }
 

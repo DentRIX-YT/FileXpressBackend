@@ -29,6 +29,12 @@ public class HandshakeService {
 
     //add handshake to the database temporarily
     public Handshake addHandshake(String senderUsername, String handshakeCode) {
+
+        //Chcek if a handshake already exist, if it is delete it
+        Optional<Handshake> existHandshake = handshakeRepository.findBySenderUsername(senderUsername);
+        existHandshake.ifPresent(handshakeRepository::delete);
+
+
         Handshake handshake = new Handshake();
         handshake.setHandshakeCode(handshakeCode);
         handshake.setSenderUsername(senderUsername);
