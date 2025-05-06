@@ -2,6 +2,7 @@ package org.example.filexpressbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.filexpressbackend.dto.AddLogRequest;
+import org.example.filexpressbackend.dto.TransferLogDto;
 import org.example.filexpressbackend.entity.TransferLog;
 import org.example.filexpressbackend.entity.User;
 import org.example.filexpressbackend.enums.TransferMethod;
@@ -45,5 +46,34 @@ public class TransferLogService {
 
         transferLogRepository.save(log);
     }
+
+    public TransferLogDto toDto(TransferLog log) {
+        TransferLogDto dto = new TransferLogDto();
+        dto.setSenderUsername(log.getSender().getUsername());
+        dto.setReceiverUsername(log.getReceiver().getUsername());
+        dto.setFilename(log.getFilename());
+        dto.setTimestamp(log.getTimestamp());
+
+        // פירוש ברור לשיטת ההעברה
+        String readableMethod;
+        switch (log.getMethod()) {
+            case CLIENT_TO_CLIENT:
+                readableMethod = "Direct (Client to Client)";
+                break;
+            case CLIENT_TO_BOTH:
+                readableMethod = "Upload (Sender to Server)";
+                break;
+            case SERVER_RELAY:
+                readableMethod = "Download (Server to Recipient)";
+                break;
+            default:
+                readableMethod = "Unknown";
+                break;
+        }
+
+        dto.setMethod(readableMethod);
+        return dto;
+    }
+
 
 }

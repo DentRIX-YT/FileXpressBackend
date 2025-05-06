@@ -37,6 +37,7 @@ public class TransferLog {
     @Column(nullable = false)
     private boolean storedForLater = false;
 
+    @Column(nullable = false)
     private LocalDateTime timestamp;
 
     @PrePersist
