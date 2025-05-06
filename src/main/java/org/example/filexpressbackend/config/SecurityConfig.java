@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/login/**", "/refresh_token").permitAll()
                         .requestMatchers("/api/private-key/**").permitAll()
                         .requestMatchers("/api/public-key/**").permitAll()
+                        .requestMatchers("/api/logs/**").permitAll()
                         .requestMatchers("/handshake/**").permitAll()
                         .requestMatchers("/webrtc-signaling/**").permitAll()
                         .requestMatchers("/webrtc/**").permitAll()

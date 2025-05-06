@@ -138,4 +138,9 @@ public class UserService {
         return userRepository.findByUsername(username).getEmail();
     }
 
+    public User getUserEntityByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+
 }

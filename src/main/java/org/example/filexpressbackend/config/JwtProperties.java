@@ -5,8 +5,8 @@ package org.example.filexpressbackend.config;
  */
 public class JwtProperties {
 
-    // Expiration time for access tokens (5 minutes in milliseconds)
-    public static final int ACCESS_TOKEN_EXPIRATION_TIME = 50_000;
+    // Expiration time for access tokens (2 min in milliseconds)
+    public static final int ACCESS_TOKEN_EXPIRATION_TIME = 120_000;
 
     // Additional idle time added to refresh token expiration (20 minutes in milliseconds)
     public static final int REFRESH_TOKEN_IDLE_TIME = 1_200_000;

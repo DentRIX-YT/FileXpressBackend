@@ -21,4 +21,11 @@ public class WebRTCConnectionRegistry {
     public Map<String, String> getAllConnections() {
         return activeConnections;
     }
+
+    public void removeConnection(String username) {
+        String peer = activeConnections.remove(username);
+        if (peer != null) {
+            activeConnections.remove(peer);
+        }
+    }
 }

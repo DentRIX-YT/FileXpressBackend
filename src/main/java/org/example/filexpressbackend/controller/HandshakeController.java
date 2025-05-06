@@ -51,7 +51,6 @@ public class HandshakeController {
     public ResponseEntity<Map<String, String>> checkHandshakeStatus(@PathVariable String senderUsername) {
         boolean isCompleted = handshakeService.isHandshakeComplete(senderUsername);
         if (isCompleted) {
-//            handshakeService.removeHandshake(senderUsername); //not removing the handshake for now
             return ResponseEntity.ok(Map.of("status", "completed", "receiverUsername" , handshakeService.getReceiverFromSender(senderUsername), "receiverPublicKey", handshakeService.getReceiverPublicKey(senderUsername)));
         }
         return ResponseEntity.ok(Map.of("status", "pending"));
@@ -62,4 +61,15 @@ public class HandshakeController {
         handshakeService.removeHandshake(senderUsername);
         return ResponseEntity.ok(Map.of("status", "removed"));
     }
+
+    @GetMapping("/is-valid")
+    public ResponseEntity<Boolean> isHandshakeValid(
+            @RequestParam String senderUsername,
+            @RequestParam String receiverUsername
+    ) {
+        boolean valid = handshakeService.isHandshakeApprovedBetween(senderUsername, receiverUsername);
+        return ResponseEntity.ok(valid);
+    }
+
+
 }

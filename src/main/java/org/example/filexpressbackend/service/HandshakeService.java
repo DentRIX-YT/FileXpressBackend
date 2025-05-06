@@ -159,4 +159,8 @@ public class HandshakeService {
                 .map(Handshake::getReceiverUsername)
                 .orElse(null);
     }
+
+    public boolean isHandshakeApprovedBetween(String senderUsername, String receiverUsername) {
+        return handshakeRepository.existsByUsersAndAccepted(senderUsername, receiverUsername);
+    }
 }

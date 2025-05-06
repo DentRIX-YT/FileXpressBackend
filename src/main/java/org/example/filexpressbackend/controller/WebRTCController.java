@@ -23,7 +23,7 @@ public class WebRTCController {
         }
 
         connectionRegistry.addConnection(sender, receiver);
-        System.out.println("✅ WebRTC Connection Established: " + sender + " ↔ " + receiver);
+        System.out.println("WebRTC Connection Established: " + sender + " ↔ " + receiver);
         return ResponseEntity.ok("{\"message\": \"WebRTC Connection Started\"}");
     }
 
@@ -31,4 +31,12 @@ public class WebRTCController {
     public ResponseEntity<Map<String, String>> getConnections() {
         return ResponseEntity.ok(connectionRegistry.getAllConnections());
     }
+
+    @DeleteMapping("/disconnect")
+    public ResponseEntity<String> disconnectWebRTC(@RequestParam String username) {
+        connectionRegistry.removeConnection(username);
+        System.out.println("WebRTC Connection closed for: " + username);
+        return ResponseEntity.ok("{\"message\": \"WebRTC Connection Removed\"}");
+    }
+
 }
