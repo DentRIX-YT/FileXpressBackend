@@ -14,23 +14,30 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService, TokenBlacklistService tokenBlacklistService) {
-        this.jwtUtil = jwtUtil;
-        this.customUserDetailsService = customUserDetailsService;
-        this.tokenBlacklistService = tokenBlacklistService;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String requestPath = request.getServletPath();
+
+        // Skip WebSocket and other public paths
+        if (requestPath.equals("/file-upload") || requestPath.startsWith("/file-upload/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if ("/users/me".equals(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // Skip token validation for specific paths
         if ("/users/me".equals(requestPath)) {

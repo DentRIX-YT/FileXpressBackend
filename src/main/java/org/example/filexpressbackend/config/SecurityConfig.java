@@ -51,7 +51,8 @@ public class SecurityConfig {
                     corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
                     corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     corsConfig.setAllowedHeaders(List.of("*"));
-                    corsConfig.setAllowCredentials(true); // Fix for CORS Credentials
+                    corsConfig.setExposedHeaders(List.of("*"));
+                    corsConfig.setAllowCredentials(true);
                     return corsConfig;
                 }))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService, tokenBlacklistService),
@@ -60,6 +61,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/home").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/login/**", "/refresh_token").permitAll()
+                        .requestMatchers("/file-upload").permitAll()
+                        .requestMatchers("/file-upload/**").permitAll()
                         .requestMatchers("/api/private-key/**").permitAll()
                         .requestMatchers("/api/public-key/**").permitAll()
                         .requestMatchers("/api/logs/**").permitAll()
