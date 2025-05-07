@@ -7,5 +7,6 @@ public class FilePathsDTO {
     Long id;
     String originalFilename;
     String path;
+    Long size;
     String uploadedAt;
 }

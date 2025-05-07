@@ -63,6 +63,8 @@ public class SecurityConfig {
                         .requestMatchers("/login/**", "/refresh_token").permitAll()
                         .requestMatchers("/file-upload").permitAll()
                         .requestMatchers("/file-upload/**").permitAll()
+                        .requestMatchers("/file-download").permitAll()
+                        .requestMatchers("/file-download/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/private-key/**").permitAll()
                         .requestMatchers("/api/public-key/**").permitAll()

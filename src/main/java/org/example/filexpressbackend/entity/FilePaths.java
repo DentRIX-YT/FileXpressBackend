@@ -31,6 +31,9 @@ public class FilePaths {
     @Column(nullable = false)
     private String iv; // ה-IV ששימש להצפנה (base64 או HEX)
 
+    @Column(nullable = false)
+    private Long size;
+
     private LocalDateTime uploadedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)

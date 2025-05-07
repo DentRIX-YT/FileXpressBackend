@@ -3,7 +3,6 @@ package org.example.filexpressbackend.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.example.filexpressbackend.entity.FilePaths;
@@ -63,9 +62,6 @@ public class WebSocketFileHandler implements WebSocketHandler {
             } else if ("EOF".equals(type)) {
                 saveToDiskAndDatabase(session);
                 System.out.println("Received EOF");
-            } else if ("downloadRequest".equals(type)) {
-                Long fileID = root.get("fileID").asLong();
-                handleFileDownload(session, fileID);
             }
         } else if (message instanceof BinaryMessage binaryMessage) {
 //            System.out.println("Received binary message");
@@ -73,48 +69,6 @@ public class WebSocketFileHandler implements WebSocketHandler {
         }
         else{
             System.out.println("Received unknown message type: " + message.getClass());
-        }
-    }
-
-    private void handleFileDownload(WebSocketSession session, Long requestFileID) {
-        try {
-            // חיפוש הקובץ במסד נתונים
-            FilePaths fileRecord = filePathsService.getFileById(requestFileID);
-            if (fileRecord == null) {
-                session.sendMessage(new TextMessage("ERROR: File not found"));
-                return;
-            }
-
-            Path filePath = Paths.get(fileRecord.getPath());
-            if (!Files.exists(filePath)) {
-                session.sendMessage(new TextMessage("ERROR: File missing on server"));
-                return;
-            }
-
-            // שליחת metadata לפני התוכן הבינארי
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode responseMetadata = mapper.createObjectNode();
-            responseMetadata.put("type", "downloadMetadata");
-            ObjectNode meta = responseMetadata.putObject("metadata");
-            meta.put("filename", fileRecord.getOriginalFilename());
-            meta.put("iv", fileRecord.getIv());
-            meta.put("encryptedAESKey", fileRecord.getEncryptedAESKey());
-            meta.put("sha256", fileRecord.getFileHash());
-            meta.put("totalSize", Files.size(filePath));
-
-            session.sendMessage(new TextMessage(responseMetadata.toString()));
-
-            // שליחת תוכן הקובץ כ־Binary
-            byte[] fileBytes = Files.readAllBytes(filePath);
-            session.sendMessage(new BinaryMessage(fileBytes));
-
-            session.sendMessage(new TextMessage("{\"type\":\"EOF\"}"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            try {
-                session.sendMessage(new TextMessage("ERROR: " + e.getMessage()));
-            } catch (IOException ignored) {
-            }
         }
     }
 
@@ -135,6 +89,7 @@ public class WebSocketFileHandler implements WebSocketHandler {
             System.out.println(meta.iv);
             System.out.println(meta.sha256);
             System.out.println(meta.filename);
+            System.out.println(meta.totalSize);
             System.out.println(filePath.toString());
 
             User receiver = userRepository.findByUsername(meta.receiver);
@@ -146,6 +101,7 @@ public class WebSocketFileHandler implements WebSocketHandler {
             fileRecord.setOriginalFilename(meta.filename);
             fileRecord.setFileHash(meta.sha256);
             fileRecord.setUploadedAt(LocalDateTime.now());
+            fileRecord.setSize(meta.totalSize);
             fileRecord.setEncryptedAESKey(meta.encryptedAESKey);
             fileRecord.setIv(meta.iv);
 
@@ -190,6 +146,7 @@ public class WebSocketFileHandler implements WebSocketHandler {
         public String receiver;
         public String filename;
         public String sha256;
+        public Long totalSize;
         public String iv;
         public String encryptedAESKey;
     }
