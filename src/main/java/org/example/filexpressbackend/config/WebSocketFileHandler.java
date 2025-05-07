@@ -3,12 +3,14 @@ package org.example.filexpressbackend.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.example.filexpressbackend.entity.FilePaths;
 import org.example.filexpressbackend.entity.User;
 import org.example.filexpressbackend.repository.FilePathsRepository;
 import org.example.filexpressbackend.repository.UserRepository;
+import org.example.filexpressbackend.service.FilePathsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
@@ -26,6 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WebSocketFileHandler implements WebSocketHandler {
 
     private final FilePathsRepository filePathsRepository;
+    private final FilePathsService filePathsService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -60,6 +63,9 @@ public class WebSocketFileHandler implements WebSocketHandler {
             } else if ("EOF".equals(type)) {
                 saveToDiskAndDatabase(session);
                 System.out.println("Received EOF");
+            } else if ("downloadRequest".equals(type)) {
+                Long fileID = root.get("fileID").asLong();
+                handleFileDownload(session, fileID);
             }
         } else if (message instanceof BinaryMessage binaryMessage) {
 //            System.out.println("Received binary message");
@@ -67,6 +73,48 @@ public class WebSocketFileHandler implements WebSocketHandler {
         }
         else{
             System.out.println("Received unknown message type: " + message.getClass());
+        }
+    }
+
+    private void handleFileDownload(WebSocketSession session, Long requestFileID) {
+        try {
+            // חיפוש הקובץ במסד נתונים
+            FilePaths fileRecord = filePathsService.getFileById(requestFileID);
+            if (fileRecord == null) {
+                session.sendMessage(new TextMessage("ERROR: File not found"));
+                return;
+            }
+
+            Path filePath = Paths.get(fileRecord.getPath());
+            if (!Files.exists(filePath)) {
+                session.sendMessage(new TextMessage("ERROR: File missing on server"));
+                return;
+            }
+
+            // שליחת metadata לפני התוכן הבינארי
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode responseMetadata = mapper.createObjectNode();
+            responseMetadata.put("type", "downloadMetadata");
+            ObjectNode meta = responseMetadata.putObject("metadata");
+            meta.put("filename", fileRecord.getOriginalFilename());
+            meta.put("iv", fileRecord.getIv());
+            meta.put("encryptedAESKey", fileRecord.getEncryptedAESKey());
+            meta.put("sha256", fileRecord.getFileHash());
+            meta.put("totalSize", Files.size(filePath));
+
+            session.sendMessage(new TextMessage(responseMetadata.toString()));
+
+            // שליחת תוכן הקובץ כ־Binary
+            byte[] fileBytes = Files.readAllBytes(filePath);
+            session.sendMessage(new BinaryMessage(fileBytes));
+
+            session.sendMessage(new TextMessage("{\"type\":\"EOF\"}"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                session.sendMessage(new TextMessage("ERROR: " + e.getMessage()));
+            } catch (IOException ignored) {
+            }
         }
     }
 

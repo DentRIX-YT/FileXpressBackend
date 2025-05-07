@@ -23,4 +23,8 @@ public class FilePathsService {
     public List<FilePaths> getFilesForUser(User user) {
         return filePathsRepository.findByUser(user);
     }
+
+    public FilePaths getFileById(Long id) {
+        return filePathsRepository.findById(id).orElse(null);
+    }
 }

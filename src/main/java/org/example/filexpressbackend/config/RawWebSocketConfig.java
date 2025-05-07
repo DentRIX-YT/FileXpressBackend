@@ -13,13 +13,17 @@ import org.springframework.web.socket.config.annotation.*;
 public class RawWebSocketConfig implements WebSocketConfigurer {
 
     private final WebSocketFileHandler fileUploadHandler;
+    private final WebSocketRelayHandler relayHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         System.out.println("✅ Registering WebSocketHandler for /file-upload");
         registry
                 .addHandler(fileUploadHandler, "/file-upload")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("http://localhost:3000");
+        registry.addHandler(relayHandler, "/file-relay")
+                .setAllowedOrigins("http://localhost:3000");
+
 
         ;
     }

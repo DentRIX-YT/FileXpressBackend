@@ -63,9 +63,6 @@ public class TransferLogService {
             case CLIENT_TO_BOTH:
                 readableMethod = "Upload (Sender to Server)";
                 break;
-            case SERVER_RELAY:
-                readableMethod = "Download (Server to Recipient)";
-                break;
             default:
                 readableMethod = "Unknown";
                 break;
