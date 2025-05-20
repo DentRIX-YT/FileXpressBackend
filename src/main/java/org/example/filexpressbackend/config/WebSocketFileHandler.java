@@ -43,7 +43,7 @@ public class WebSocketFileHandler implements WebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         session.setBinaryMessageSizeLimit(10 * 1024 * 1024); // או כמה שאתה צריך
         sessionBuffers.put(session.getId(), new ByteArrayOutputStream());
-        System.out.println("✅ WebSocket connection established with session ID: " + session.getId());
+        System.out.println("WebSocket connection established with session ID: " + session.getId());
     }
 
     @Override

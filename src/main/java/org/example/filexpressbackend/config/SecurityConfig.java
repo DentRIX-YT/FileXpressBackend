@@ -1,6 +1,5 @@
 package org.example.filexpressbackend.config;
 
-import lombok.RequiredArgsConstructor;
 import org.example.filexpressbackend.service.CustomUserDetailsService;
 import org.example.filexpressbackend.service.TokenBlacklistService;
 import org.springframework.context.annotation.Bean;
@@ -20,7 +19,6 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-//@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
@@ -29,7 +27,11 @@ public class SecurityConfig {
     private final CustomLogoutHandler customLogoutHandler;
     private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
 
-    public SecurityConfig(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService, TokenBlacklistService tokenBlacklistService, CustomLogoutHandler customLogoutHandler, CustomLogoutSuccessHandler customLogoutSuccessHandler) {
+    public SecurityConfig(JwtUtil jwtUtil,
+                          CustomUserDetailsService userDetailsService,
+                          TokenBlacklistService tokenBlacklistService,
+                          CustomLogoutHandler customLogoutHandler,
+                          CustomLogoutSuccessHandler customLogoutSuccessHandler) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
         this.tokenBlacklistService = tokenBlacklistService;
@@ -43,42 +45,35 @@ public class SecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService, tokenBlacklistService);
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
-                    var corsConfig = new CorsConfiguration();
-                    corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
-                    corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    corsConfig.setAllowedHeaders(List.of("*"));
-                    corsConfig.setExposedHeaders(List.of("*"));
-                    corsConfig.setAllowCredentials(true);
-                    return corsConfig;
+                    var cfg = new CorsConfiguration();
+                    cfg.setAllowedOrigins(List.of("http://localhost:3000"));
+                    cfg.setAllowedMethods(List.of("*"));
+                    cfg.setAllowedHeaders(List.of("*"));
+                    cfg.setExposedHeaders(List.of("*"));
+                    cfg.setAllowCredentials(true);
+                    return cfg;
                 }))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService, tokenBlacklistService),
-                        UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/home").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/login/**", "/refresh_token").permitAll()
-                        .requestMatchers("/file-upload").permitAll()
-                        .requestMatchers("/file-upload/**").permitAll()
-                        .requestMatchers("/file-download").permitAll()
-                        .requestMatchers("/file-download/**").permitAll()
-                        .requestMatchers("/api/files/**").permitAll()
-                        .requestMatchers("/api/private-key/**").permitAll()
-                        .requestMatchers("/api/public-key/**").permitAll()
-                        .requestMatchers("/api/logs/**").permitAll()
-                        .requestMatchers("/handshake/**").permitAll()
+                        .requestMatchers("/users/me").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers("/webrtc-signaling/**").permitAll()
-                        .requestMatchers("/webrtc/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/handshake/remove/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/me").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
+                        .requestMatchers("/file-upload/**").permitAll()
+                        .requestMatchers("/file-download/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .addLogoutHandler(customLogoutHandler)
@@ -86,7 +81,8 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .clearAuthentication(true)
-                        .permitAll());
+                        .permitAll()
+                );
 
         return http.build();
     }
