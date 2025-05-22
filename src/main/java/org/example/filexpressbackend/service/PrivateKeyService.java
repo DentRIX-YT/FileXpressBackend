@@ -71,7 +71,7 @@ public class PrivateKeyService {
 
             // Decrypt using AES-GCM
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-            GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv); // ✅ Use GCMParameterSpec instead of IvParameterSpec
+            GCMParameterSpec gcmSpec = new GCMParameterSpec(128, iv); // Use GCMParameterSpec instead of IvParameterSpec
             cipher.init(Cipher.DECRYPT_MODE, secretKey, gcmSpec);
 
             byte[] decryptedBytes = cipher.doFinal(cipherText);

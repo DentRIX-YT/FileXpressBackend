@@ -21,7 +21,7 @@ public class UdpFileTransferService {
     public void startUdpServer() {
         new Thread(() -> {
             try (DatagramSocket serverSocket = new DatagramSocket(SERVER_UDP_PORT)) {
-                System.out.println("📡 UDP Server listening on port " + SERVER_UDP_PORT);
+                System.out.println("UDP Server listening on port " + SERVER_UDP_PORT);
 
                 byte[] receiveBuffer = new byte[BUFFER_SIZE];
 
@@ -76,7 +76,7 @@ public class UdpFileTransferService {
             );
 
             relaySocket.send(relayPacket);
-            System.out.println("🔁 Relayed packet to receiver: " + receiverUsername);
+            System.out.println("Relayed packet to receiver: " + receiverUsername);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -20,7 +20,7 @@ public class WebRTCSignalingHandler {
         String peer = connectionRegistry.getPeer(message.getFrom());
         if (peer != null) {
             message.setTo(peer);
-            System.out.println("📡 Redirecting WebRTC Signal from " + message.getFrom() + " to " + peer);
+            System.out.println("Redirecting WebRTC Signal from " + message.getFrom() + " to " + peer);
         }
         return message;
     }

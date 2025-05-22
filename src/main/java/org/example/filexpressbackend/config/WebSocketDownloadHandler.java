@@ -22,7 +22,7 @@ public class WebSocketDownloadHandler implements WebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        System.out.println("📥 Download session opened: " + session.getId());
+        System.out.println("Download session opened: " + session.getId());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class WebSocketDownloadHandler implements WebSocketHandler {
             if (!root.has("fileID") || root.get("fileID").isNull()) {
                 session.sendMessage(new TextMessage("ERROR: Missing fileID in request"));
                 session.close(CloseStatus.BAD_DATA);
-                System.err.println("❌ Missing fileID in download request");
+                System.err.println("Missing fileID in download request");
                 return;
             }
 

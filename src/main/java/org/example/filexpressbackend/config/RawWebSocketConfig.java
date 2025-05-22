@@ -16,7 +16,7 @@ public class RawWebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        System.out.println("✅ Registering WebSocketHandler for /file-upload");
+        System.out.println("Registering WebSocketHandler for /file-upload");
         registry
                 .addHandler(fileUploadHandler, "/file-upload")
                 .setAllowedOrigins("http://localhost:3000");
